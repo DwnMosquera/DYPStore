@@ -1,1 +1,1 @@
-el modelo imagnes esta teniendo un error al cargar 
+el modelo imagnes esta teniendo un error al cargar las vistas
