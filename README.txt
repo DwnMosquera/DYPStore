@@ -1,3 +1,5 @@
+25/05/2026 -- documentacion victor
+
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                    DYPStore — Tienda Virtual Deportiva                      ║
 ║                  ASP.NET Core 8 MVC + Entity Framework + SQL Server         ║
