@@ -1,3 +1,5 @@
+# 25/05/2026 - documentacion victor
+
 # DYPStore - Documentación Completa del Proyecto
 
 ## 📋 Resumen Ejecutivo
