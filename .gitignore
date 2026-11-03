@@ -3,6 +3,11 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Archive files
+*.zip
+*.tar.gz
+*.7z
+
 # dotenv files
 .env
 

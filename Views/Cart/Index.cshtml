@@ -73,19 +73,310 @@
                         <span style="font-size:1.05rem;">Total</span>
                         <span class="dyp-price" style="font-size:1.6rem;">$@Model.Total.ToString("N0")</span>
                     </div>
-                    <form asp-controller="Cart" asp-action="Checkout" method="post" class="mt-3">
+
+                    <!-- Botón de Pago con Pasarela Wompi -->
+                    <button type="button" class="btn btn-danger w-100 btn-lg fw-bold d-flex align-items-center justify-content-center py-3 mt-3" data-bs-toggle="modal" data-bs-target="#wompiModal">
+                        <i class="bi bi-shield-check me-2 fs-5"></i>Pagar con Wompi
+                    </button>
+
+                    <!-- Métodos aceptados en Colombia -->
+                    <div class="mt-3 p-2 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25 text-center">
+                        <div class="text-secondary small fw-semibold mb-2" style="font-size:0.75rem; letter-spacing:0.05em; text-transform:uppercase;">Medios de Pago Habilitados</div>
+                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                            <span class="badge" style="background:#200020; color:#da0081; border:1px solid #da0081; font-weight:700;"><i class="bi bi-phone me-1"></i>Nequi</span>
+                            <span class="badge" style="background:#000; color:#fdc300; border:1px solid #fdc300; font-weight:700;"><i class="bi bi-bank me-1"></i>Bancolombia</span>
+                            <span class="badge" style="background:#400000; color:#ff4d4d; border:1px solid #ff4d4d; font-weight:700;"><i class="bi bi-wallet2 me-1"></i>Daviplata</span>
+                            <span class="badge bg-secondary text-white"><i class="bi bi-credit-card me-1"></i>Tarjetas</span>
+                        </div>
+                    </div>
+
+                    <!-- Formulario de Checkout Real para Persistencia en BD -->
+                    <form id="realCheckoutForm" asp-controller="Cart" asp-action="Checkout" method="post" class="mt-2 text-center">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger w-100 btn-lg">
-                            <i class="bi bi-bag-check-fill me-2"></i>Completar Compra
+                        <button type="submit" class="btn btn-link text-secondary text-decoration-none small p-0 opacity-75" style="font-size:0.75rem;">
+                            <i class="bi bi-lightning-charge me-1"></i>Omitir pasarela (Checkout rápido directo)
                         </button>
                     </form>
-                    <div class="dyp-trust-mini">
-                        <span><i class="bi bi-shield-lock-fill"></i>Pago seguro</span>
+
+                    <div class="dyp-trust-mini mt-3">
+                        <span><i class="bi bi-shield-lock-fill"></i>Wompi Seguro</span>
                         <span><i class="bi bi-arrow-counterclockwise"></i>30 días</span>
                         <span><i class="bi bi-truck"></i>Envío rápido</span>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- ====================================================================
+             MODAL DE PASARELA DE PAGO WOMPI (DEMO OFICIAL COLOMBIA)
+             Soporta: Nequi, Botón Bancolombia, Daviplata y Tarjetas Crédito/Débito
+             ==================================================================== -->
+        <div class="modal fade" id="wompiModal" tabindex="-1" aria-labelledby="wompiModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content bg-dark text-white border border-secondary border-opacity-50 shadow-lg" style="border-radius:20px; overflow:hidden;">
+                    
+                    <!-- Header Wompi -->
+                    <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3" style="background:linear-gradient(135deg, #16161f 0%, #0d0d14 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="background:#000; padding:6px 14px; border-radius:10px; border:1px solid #fdc300;">
+                                <span style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.4rem; letter-spacing:0.04em; color:#fff;">wompi<span style="color:#fdc300;">.</span></span>
+                            </div>
+                            <div>
+                                <h6 class="modal-title fw-bold mb-0 text-white" id="wompiModalLabel">Pasarela de Pagos Segura</h6>
+                                <small class="text-warning" style="font-size:0.75rem;"><i class="bi bi-cone-striped me-1"></i>Ambiente Sandbox Demo · Vigilado SuperFinanciera</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-secondary small d-block">Monto a Pagar</span>
+                            <span class="fw-bold fs-5 text-white">$@Model.Total.ToString("N0") <small class="text-danger">COP</small></span>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white ms-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <!-- Cuerpo Modal con Pestañas de Pago -->
+                    <div class="modal-body p-4">
+                        <!-- Navegación de Métodos de Pago Wompi -->
+                        <ul class="nav nav-pills nav-fill mb-4 p-1 rounded-3 bg-black border border-secondary border-opacity-25" id="wompiTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" id="tab-nequi" data-bs-toggle="pill" data-bs-target="#wompi-nequi" type="button" role="tab">
+                                    <span class="badge" style="background:#da0081;">N</span> Nequi
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" id="tab-bancolombia" data-bs-toggle="pill" data-bs-target="#wompi-bancolombia" type="button" role="tab">
+                                    <span class="badge" style="background:#fdc300; color:#000;">B</span> Bancolombia
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" id="tab-daviplata" data-bs-toggle="pill" data-bs-target="#wompi-daviplata" type="button" role="tab">
+                                    <span class="badge" style="background:#ed1c24;">D</span> Daviplata
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" id="tab-card" data-bs-toggle="pill" data-bs-target="#wompi-card" type="button" role="tab">
+                                    <i class="bi bi-credit-card-2-front text-info"></i> Tarjetas
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Contenedores de cada medio de pago -->
+                        <div class="tab-content" id="wompiTabsContent">
+
+                            <!-- 1. NEQUI -->
+                            <div class="tab-pane fade show active" id="wompi-nequi" role="tabpanel">
+                                <div class="p-3 rounded-3 mb-3" style="background:rgba(218,0,129,0.08); border:1px solid rgba(218,0,129,0.25);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:2rem; color:#da0081;"><i class="bi bi-phone-vibrate"></i></div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Paga rápido y seguro con Nequi</h6>
+                                            <p class="text-secondary small mb-0">Ingresa tu número celular y autoriza el débito desde la notificación push en tu app Nequi.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="formWompiNequi" onsubmit="procesarPagoWompi(event, 'Nequi')">
+                                    <div class="mb-3">
+                                        <label class="form-label text-secondary small fw-bold">Número de Celular Nequi</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-black border-secondary text-secondary">+57</span>
+                                            <input type="tel" class="form-control dyp-input" placeholder="300 123 4567" required pattern="3[0-9]{9}" maxlength="10" value="3124567890" />
+                                        </div>
+                                        <small class="text-secondary">Se enviará una solicitud de pago por $@Model.Total.ToString("N0") COP.</small>
+                                    </div>
+                                    <div id="nequiPushSim" class="p-3 rounded-3 bg-black border border-secondary border-opacity-25 mb-3 d-none text-center">
+                                        <div class="spinner-grow text-danger mb-2" role="status" style="width:2rem; height:2rem;"></div>
+                                        <div class="text-white fw-bold">Notificación Push enviada a tu Nequi</div>
+                                        <small class="text-secondary d-block mb-2">Abre la app de Nequi y presiona "Aceptar"</small>
+                                        <button type="button" class="btn btn-sm btn-outline-light" onclick="aprobarPagoSimulado()">Simular Aprobación en Nequi</button>
+                                    </div>
+                                    <button type="submit" id="btnNequiPay" class="btn btn-lg w-100 fw-bold" style="background:#da0081; color:#fff;">
+                                        <i class="bi bi-send-check me-2"></i>Generar Cobro Nequi
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- 2. BANCOLOMBIA (BOTÓN BANCOLOMBIA / TRANSFERENCIA) -->
+                            <div class="tab-pane fade" id="wompi-bancolombia" role="tabpanel">
+                                <div class="p-3 rounded-3 mb-3" style="background:rgba(253,195,0,0.08); border:1px solid rgba(253,195,0,0.25);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:2rem; color:#fdc300;"><i class="bi bi-bank"></i></div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Botón Bancolombia / Transferencia Directa</h6>
+                                            <p class="text-secondary small mb-0">Débito automático desde tu cuenta de Ahorros o Corriente sin costo adicional.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="formWompiBancolombia" onsubmit="procesarPagoWompi(event, 'Bancolombia')">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Tipo de Cuenta</label>
+                                            <select class="form-select dyp-input">
+                                                <option value="ahorros">Cuenta de Ahorros Bancolombia</option>
+                                                <option value="corriente">Cuenta Corriente Bancolombia</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Número de Cuenta</label>
+                                            <input type="text" class="form-control dyp-input" placeholder="Ej: 123-456789-01" value="541-987654-32" required />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Documento de Identidad</label>
+                                            <input type="text" class="form-control dyp-input" placeholder="Cédula de Ciudadanía" value="1020304050" required />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Clave Dinámica Virtual (6 dígitos)</label>
+                                            <input type="password" class="form-control dyp-input text-center font-monospace" placeholder="••••••" maxlength="6" value="789012" required />
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-lg w-100 fw-bold mt-4" style="background:#fdc300; color:#000;">
+                                        <i class="bi bi-check2-circle me-2"></i>Pagar con Transferencia Bancolombia
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- 3. DAVIPLATA -->
+                            <div class="tab-pane fade" id="wompi-daviplata" role="tabpanel">
+                                <div class="p-3 rounded-3 mb-3" style="background:rgba(237,28,36,0.08); border:1px solid rgba(237,28,36,0.25);">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="font-size:2rem; color:#ed1c24;"><i class="bi bi-wallet2"></i></div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Pago Seguro con Daviplata</h6>
+                                            <p class="text-secondary small mb-0">Ingresa tu número registrado y confirma el código OTP de seguridad.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="formWompiDaviplata" onsubmit="procesarPagoWompi(event, 'Daviplata')">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Número Celular Daviplata</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-black border-secondary text-secondary">+57</span>
+                                                <input type="tel" class="form-control dyp-input" placeholder="310 987 6543" value="3159876543" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Número de Cédula</label>
+                                            <input type="text" class="form-control dyp-input" placeholder="Número de Documento" value="1098765432" required />
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-secondary small fw-bold">Código OTP de Seguridad (Recibido por SMS)</label>
+                                            <input type="password" class="form-control dyp-input text-center font-monospace" placeholder="6 dígitos (Ej: 456789)" maxlength="6" value="456789" required />
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-lg w-100 fw-bold mt-4" style="background:#ed1c24; color:#fff;">
+                                        <i class="bi bi-shield-check me-2"></i>Confirmar Pago Daviplata
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- 4. TARJETAS DE CRÉDITO / DÉBITO -->
+                            <div class="tab-pane fade" id="wompi-card" role="tabpanel">
+                                <form id="formWompiCard" onsubmit="procesarPagoWompi(event, 'Tarjeta de Crédito')">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label text-secondary small fw-bold">Número de Tarjeta</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-black border-secondary text-secondary"><i class="bi bi-credit-card"></i></span>
+                                                <input type="text" class="form-control dyp-input font-monospace" placeholder="4000 1234 5678 9010" value="4575 8920 1142 8890" maxlength="19" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-secondary small fw-bold">Nombre del Titular</label>
+                                            <input type="text" class="form-control dyp-input" placeholder="Como figura en la tarjeta" value="CARLOS A MENDOZA" required />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-secondary small fw-bold">Expiración</label>
+                                            <input type="text" class="form-control dyp-input text-center font-monospace" placeholder="MM/AA" value="08/29" maxlength="5" required />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-secondary small fw-bold">CVV</label>
+                                            <input type="password" class="form-control dyp-input text-center font-monospace" placeholder="123" value="789" maxlength="4" required />
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-secondary small fw-bold">Cuotas</label>
+                                            <select class="form-select dyp-input">
+                                                <option value="1">1 cuota (Sin interés)</option>
+                                                <option value="3">3 cuotas</option>
+                                                <option value="6">6 cuotas</option>
+                                                <option value="12">12 cuotas</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold mt-4">
+                                        <i class="bi bi-lock-fill me-2"></i>Pagar $@Model.Total.ToString("N0") COP con Tarjeta
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+
+                        <!-- Estado de Procesamiento / Transacción Aprobada -->
+                        <div id="wompiProcessingState" class="text-center py-4 d-none">
+                            <div class="spinner-border text-danger mb-3" role="status" style="width:3rem; height:3rem;"></div>
+                            <h5 class="fw-bold text-white mb-1">Procesando pago con Wompi...</h5>
+                            <p class="text-secondary small mb-0">Verificando fondos y emitiendo comprobante fiscal seguro.</p>
+                        </div>
+
+                        <div id="wompiSuccessState" class="text-center py-4 d-none">
+                            <div class="rounded-circle bg-success bg-opacity-25 text-success p-3 d-inline-flex mb-3">
+                                <i class="bi bi-check-circle-fill" style="font-size:3rem;"></i>
+                            </div>
+                            <h4 class="fw-bold text-white mb-1">¡Pago Aprobado por Wompi!</h4>
+                            <p class="text-secondary small mb-2">Referencia de Transacción: <span class="badge bg-secondary font-monospace" id="wompiRefCode">WMP-782910</span></p>
+                            <div class="alert alert-success py-2 small mx-auto" style="max-width:440px;">
+                                Tu pedido ha sido confirmado. Redirigiendo a tu historial de compras...
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer Wompi -->
+                    <div class="modal-footer border-top border-secondary border-opacity-25 px-4 py-2 d-flex justify-content-between align-items-center" style="background:#09090d;">
+                        <small class="text-secondary"><i class="bi bi-shield-lock-fill text-success me-1"></i>Cifrado SSL de 256 bits · Wompi Bancolombia</small>
+                        <small class="text-secondary font-monospace">DYPStore E-Commerce S.A.S</small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function procesarPagoWompi(e, metodo) {
+                e.preventDefault();
+                
+                if (metodo === 'Nequi' && !document.getElementById('nequiPushSim').classList.contains('active-sim')) {
+                    document.getElementById('nequiPushSim').classList.remove('d-none');
+                    document.getElementById('nequiPushSim').classList.add('active-sim');
+                    document.getElementById('btnNequiPay').innerText = "Esperando confirmación en Nequi...";
+                    document.getElementById('btnNequiPay').disabled = true;
+                    return;
+                }
+
+                ejecutarConfirmacionTransaccion(metodo);
+            }
+
+            function aprobarPagoSimulado() {
+                ejecutarConfirmacionTransaccion('Nequi Push');
+            }
+
+            function ejecutarConfirmacionTransaccion(metodo) {
+                // Ocultar pestañas y mostrar procesamiento
+                document.getElementById('wompiTabs').classList.add('d-none');
+                document.getElementById('wompiTabsContent').classList.add('d-none');
+                document.getElementById('wompiProcessingState').classList.remove('d-none');
+
+                setTimeout(function() {
+                    document.getElementById('wompiProcessingState').classList.add('d-none');
+                    document.getElementById('wompiSuccessState').classList.remove('d-none');
+                    
+                    var randomRef = 'WMP-' + Math.floor(100000 + Math.random() * 900000);
+                    document.getElementById('wompiRefCode').innerText = randomRef;
+
+                    // Enviar formulario real de checkout a ASP.NET Core
+                    setTimeout(function() {
+                        document.getElementById('realCheckoutForm').submit();
+                    }, 1400);
+                }, 1600);
+            }
+        </script>
     }
 </div>

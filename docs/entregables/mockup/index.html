@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DYPStore — Mockup Funcional Interactivo</title>
+  
+  <!-- Tipografías Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5.3 & Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  
+  <!-- Estilos del Mockup -->
+  <link rel="stylesheet" href="css/mockup.css" />
+
+  <style>
+    /* Toast Flotante */
+    .dyp-toast {
+      position: fixed;
+      top: 65px;
+      right: 24px;
+      z-index: 1090;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: all 0.25s ease;
+      max-width: 380px;
+    }
+    .dyp-toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====================================================================
+       BARRA SELECTORA DE PANTALLAS (UTILIDAD PARA EVALUACIÓN ACADÉMICA)
+       ==================================================================== -->
+  <div class="dyp-screen-selector-bar">
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-danger text-uppercase fw-bold"><i class="bi bi-display me-1"></i>Mockup Interactivo</span>
+      <span class="text-secondary d-none d-md-inline">Selecciona la pantalla que deseas auditar:</span>
+    </div>
+    <div class="d-flex align-items-center gap-1 flex-wrap">
+      <button class="dyp-screen-pill-btn active" data-screen="home" onclick="showScreen('home')">1. Inicio</button>
+      <button class="dyp-screen-pill-btn" data-screen="catalog" onclick="showScreen('catalog')">2. Catálogo</button>
+      <button class="dyp-screen-pill-btn" data-screen="details" onclick="showScreen('details')">3. Detalles</button>
+      <button class="dyp-screen-pill-btn" data-screen="login" onclick="showScreen('login')">4. Login</button>
+      <button class="dyp-screen-pill-btn" data-screen="register" onclick="showScreen('register')">5. Registro</button>
+      <button class="dyp-screen-pill-btn" data-screen="cart" onclick="showScreen('cart')">6. Carrito</button>
+      <button class="dyp-screen-pill-btn" data-screen="orders" onclick="showScreen('orders')">7. Pedidos</button>
+      <button class="dyp-screen-pill-btn" data-screen="admin-dashboard" onclick="showScreen('admin-dashboard')">8. Dashboard Admin</button>
+      <button class="dyp-screen-pill-btn" data-screen="admin-products" onclick="showScreen('admin-products')">9. Gestión Productos</button>
+    </div>
+  </div>
+
+  <!-- Toast de Notificaciones -->
+  <div id="dyp-toast" class="dyp-toast alert alert-success"></div>
+
+  <!-- ====================================================================
+       BARRA DE NAVEGACIÓN PRINCIPAL (NAVBAR)
+       ==================================================================== -->
+  <nav class="navbar navbar-expand-lg dyp-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand dyp-logo" href="javascript:void(0)" onclick="showScreen('home')">
+        <span class="dyp-logo-mark"><i class="bi bi-lightning-charge-fill"></i></span>
+        DYP<span class="text-danger">Store</span>
+      </a>
+
+      <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <i class="bi bi-list fs-3"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item">
+            <a class="nav-link text-white fw-semibold" href="javascript:void(0)" onclick="showScreen('home')">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white fw-semibold" href="javascript:void(0)" onclick="showScreen('catalog')">Catálogo</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-warning fw-semibold" href="javascript:void(0)" onclick="showScreen('admin-dashboard')">
+              <i class="bi bi-shield-lock-fill me-1"></i>Panel Admin
+            </a>
+          </li>
+        </ul>
+
+        <!-- Acciones de Usuario -->
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" class="dyp-icon-btn" title="Alternar Modo Oscuro/Claro" onclick="toggleTheme()">
+            <i class="bi bi-sun-fill"></i>
+          </button>
+          <a href="javascript:void(0)" class="dyp-icon-btn" onclick="showScreen('cart')" title="Ver Carrito">
+            <i class="bi bi-bag"></i>
+            <span class="dyp-cart-count">3</span>
+          </a>
+          <div class="dropdown">
+            <button class="dyp-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary">
+              <li><a class="dropdown-item text-white" href="javascript:void(0)" onclick="showScreen('orders')"><i class="bi bi-bag-check me-2"></i>Mis Pedidos</a></li>
+              <li><a class="dropdown-item text-white" href="javascript:void(0)" onclick="showScreen('login')"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión</a></li>
+              <li><a class="dropdown-item text-white" href="javascript:void(0)" onclick="showScreen('register')"><i class="bi bi-person-plus me-2"></i>Registrarse</a></li>
+              <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+              <li><a class="dropdown-item text-warning" href="javascript:void(0)" onclick="showScreen('admin-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Dashboard Admin</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ====================================================================
+       PANTALLA 1: INICIO (HOME)
+       ==================================================================== -->
+  <main id="view-home" class="dyp-mockup-view">
+    <!-- Hero Slider -->
+    <div class="dyp-hero-slide" style="background-image:url('https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=1800&q=85');">
+      <div class="container dyp-hero-content">
+        <div class="row">
+          <div class="col-12 col-md-8 col-lg-7">
+            <span class="dyp-hero-eyebrow"><i class="bi bi-fire"></i>Colección Profesional · Boxeo & Running</span>
+            <h1 class="dyp-hero-title">Desata tu<br/><span class="accent">verdadero potencial</span></h1>
+            <p class="dyp-hero-subtitle">Equipamiento de alto rendimiento, guantes de piel genuina, tenis deportivos con placas de carbono y nutrición atlética pura.</p>
+            <div class="d-flex gap-3 flex-wrap">
+              <button class="btn btn-danger btn-lg px-4" onclick="filterCatalogCategory('boxing'); showScreen('catalog');">
+                <i class="bi bi-bag-plus me-2"></i>Comprar Boxeo
+              </button>
+              <button class="btn btn-outline-light btn-lg px-4" onclick="showScreen('catalog')">
+                Ver Catálogo Completo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Strip -->
+    <section class="dyp-trust-strip">
+      <div class="container">
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div class="dyp-trust-item">
+              <div class="icon"><i class="bi bi-truck"></i></div>
+              <div><h6>Envío rápido</h6><p>24 a 48 horas a nivel nacional</p></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="dyp-trust-item">
+              <div class="icon"><i class="bi bi-shield-check"></i></div>
+              <div><h6>Garantía 100%</h6><p>30 días para cambios sin costo</p></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="dyp-trust-item">
+              <div class="icon"><i class="bi bi-shield-lock"></i></div>
+              <div><h6>Face ID Integrado</h6><p>Autenticación biométrica 128D</p></div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="dyp-trust-item">
+              <div class="icon"><i class="bi bi-robot"></i></div>
+              <div><h6>Asistente con IA</h6><p>Chatbot inteligente en tiempo real</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categorías -->
+    <section class="py-5">
+      <div class="container">
+        <div class="text-center mb-4">
+          <span class="text-danger small fw-bold text-uppercase letter-spacing-1">Disciplinas</span>
+          <h2 class="text-white">Compra por Categoría</h2>
+        </div>
+        <div class="row g-4">
+          <div class="col-12 col-md-4">
+            <a href="javascript:void(0)" onclick="filterCatalogCategory('boxing'); showScreen('catalog');" class="dyp-category-card" style="background-image:url('https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800&q=80');">
+              <div>
+                <div class="label">Combate</div>
+                <h3>Boxeo</h3>
+                <p>Guantes pro, vendas elásticas, sacos 70lb y protecciones.</p>
+                <span class="arrow">Explorar disciplina <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-12 col-md-4">
+            <a href="javascript:void(0)" onclick="filterCatalogCategory('shoes'); showScreen('catalog');" class="dyp-category-card" style="background-image:url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80');">
+              <div>
+                <div class="label">Velocidad</div>
+                <h3>Tenis Deportivos</h3>
+                <p>Nike Air Max, Adidas Ultraboost y zapatillas de competición.</p>
+                <span class="arrow">Explorar disciplina <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-12 col-md-4">
+            <a href="javascript:void(0)" onclick="filterCatalogCategory('supplements'); showScreen('catalog');" class="dyp-category-card" style="background-image:url('https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=800&q=80');">
+              <div>
+                <div class="label">Rendimiento</div>
+                <h3>Suplementos</h3>
+                <p>Proteínas whey aisladas, creatinas micronizadas y BCAAs.</p>
+                <span class="arrow">Explorar disciplina <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Destacados -->
+    <section class="py-5 bg-dark bg-opacity-25 border-top border-secondary border-opacity-10">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <span class="text-danger small fw-bold text-uppercase">Lo más vendido</span>
+            <h2 class="text-white mb-0">Productos Destacados</h2>
+          </div>
+          <button class="btn btn-outline-light btn-sm" onclick="showScreen('catalog')">Ver todos los 17 productos</button>
+        </div>
+        <div class="row g-4" id="home-featured-products"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 2: CATÁLOGO DE PRODUCTOS
+       ==================================================================== -->
+  <main id="view-catalog" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+          <span class="text-danger small fw-bold text-uppercase">Tienda Oficial</span>
+          <h1 class="text-white mb-1">Catálogo de Productos</h1>
+          <p id="catalog-products-count" class="text-secondary small mb-0">17 productos disponibles</p>
+        </div>
+        <!-- Barra de Búsqueda -->
+        <div class="d-flex gap-2">
+          <input type="search" id="catalog-search-input" class="form-control dyp-input" placeholder="Buscar por nombre o marca..." oninput="searchCatalog(this.value)" style="min-width:280px;" />
+          <button class="btn btn-danger" onclick="searchCatalog(document.getElementById('catalog-search-input').value)">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros por Categoría (Chips) -->
+      <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+        <button class="dyp-chip dyp-cat-chip active" data-category="all" onclick="filterCatalogCategory('all')">
+          <i class="bi bi-grid-3x3-gap"></i> Todos los productos
+        </button>
+        <button class="dyp-chip dyp-cat-chip" data-category="boxing" onclick="filterCatalogCategory('boxing')">
+          <i class="bi bi-shield-fill text-danger"></i> Boxeo
+        </button>
+        <button class="dyp-chip dyp-cat-chip" data-category="shoes" onclick="filterCatalogCategory('shoes')">
+          <i class="bi bi-lightning-charge text-primary"></i> Tenis Deportivos
+        </button>
+        <button class="dyp-chip dyp-cat-chip" data-category="supplements" onclick="filterCatalogCategory('supplements')">
+          <i class="bi bi-droplet-fill text-success"></i> Suplementos
+        </button>
+      </div>
+
+      <!-- Grid de Productos -->
+      <div class="row" id="catalog-products-grid"></div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 3: DETALLE DE PRODUCTO
+       ==================================================================== -->
+  <main id="view-details" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <nav class="text-secondary small mb-4">
+        <a href="javascript:void(0)" onclick="showScreen('home')" class="text-secondary text-decoration-none">Inicio</a>
+        <i class="bi bi-chevron-right mx-1"></i>
+        <a href="javascript:void(0)" onclick="showScreen('catalog')" class="text-secondary text-decoration-none">Catálogo</a>
+        <i class="bi bi-chevron-right mx-1"></i>
+        <span class="text-white">Detalle de Artículo</span>
+      </nav>
+
+      <div class="row g-5">
+        <div class="col-12 col-lg-6">
+          <div class="rounded-4 overflow-hidden border border-secondary border-opacity-25 position-relative bg-black" style="height: 480px;">
+            <img id="details-img" src="" alt="Producto" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+        </div>
+        <div class="col-12 col-lg-6">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span id="details-cat-badge" class="dyp-badge-cat position-static">BOXING</span>
+            <span id="details-brand" class="dyp-brand fs-6">EVERLAST</span>
+            <span class="ms-auto text-danger small"><i class="bi bi-eye-fill me-1"></i><span id="details-live-viewers">14</span> personas viendo ahora</span>
+          </div>
+
+          <h1 id="details-name" class="text-white fw-bold mb-3" style="font-size:2.4rem;">Guantes de Boxeo Pro</h1>
+
+          <div class="d-flex align-items-baseline gap-3 mb-4">
+            <span id="details-price" class="dyp-price fs-1 text-danger">$89.99</span>
+            <span class="text-secondary small">IVA incluido · Envío a todo el país</span>
+          </div>
+
+          <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary small">Disponibilidad de Inventario:</span>
+              <span id="details-stock"><span class="dyp-stock-pill">50 unidades</span></span>
+            </div>
+          </div>
+
+          <p id="details-desc" class="text-secondary mb-4" style="line-height:1.7;">
+            Guantes profesionales de cuero genuino con relleno triple de espuma de alta densidad.
+          </p>
+
+          <div class="d-flex gap-3 mb-4 flex-wrap">
+            <button class="btn btn-danger btn-lg px-5 flex-grow-1" onclick="addToCart(selectedProductId); showScreen('cart');">
+              <i class="bi bi-bag-plus me-2"></i>Añadir al Carrito
+            </button>
+            <button class="btn btn-outline-light btn-lg" onclick="showScreen('catalog')">
+              Volver al Catálogo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 4: INICIAR SESIÓN (LOGIN)
+       ==================================================================== -->
+  <main id="view-login" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="dyp-auth-split">
+        <aside class="dyp-auth-aside" style="background-image:url('https://images.unsplash.com/photo-1517438476312-10d79c077509?w=1200&q=80');">
+          <div>
+            <span class="dyp-hero-eyebrow"><i class="bi bi-stars"></i>Bienvenido de nuevo</span>
+            <h2 class="text-white fs-1">Tu próxima marca personal te espera.</h2>
+            <p class="text-light">Accede para gestionar tus pedidos y sincronizar tu carrito en todos tus dispositivos.</p>
+          </div>
+        </aside>
+
+        <div class="p-4 p-md-5 d-flex flex-column justify-content-center">
+          <div class="text-center mb-4">
+            <div class="dyp-logo fs-3 justify-content-center mb-2">
+              <span class="dyp-logo-mark"><i class="bi bi-lightning-charge-fill"></i></span>DYP<span class="text-danger">Store</span>
+            </div>
+            <h2 class="text-white fs-3">Iniciar Sesión</h2>
+            <p class="text-secondary small">Ingresa tus credenciales o accede con biometría</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); showToast('¡Sesión iniciada correctamente!'); showScreen('home');">
+            <div class="mb-3">
+              <label class="form-label text-secondary small">Correo Electrónico</label>
+              <input type="email" class="form-control dyp-input" value="admin@dypstore.com" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary small">Contraseña</label>
+              <input type="password" class="form-control dyp-input" value="Admin123!" required />
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="form-check">
+                <input class="form-check-input bg-dark border-secondary" type="checkbox" id="remMe" checked>
+                <label class="form-check-label text-secondary small" for="remMe">Recordarme</label>
+              </div>
+              <a href="javascript:void(0)" class="text-danger small text-decoration-none">¿Olvidaste tu clave?</a>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100 btn-lg fw-bold mb-3">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar al Sistema
+            </button>
+
+            <!-- Face ID Simulator Button -->
+            <button type="button" class="btn btn-outline-light w-100 btn-lg mb-3" onclick="simulateFaceId()">
+              <i class="bi bi-shield-lock-fill text-danger me-2"></i>Ingresar con Face ID (Biometría)
+            </button>
+          </form>
+
+          <p class="text-center text-secondary small mt-3 mb-0">
+            ¿No tienes cuenta? <a href="javascript:void(0)" class="text-danger fw-bold" onclick="showScreen('register')">Regístrate gratis</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 5: REGISTRO DE CUENTA
+       ==================================================================== -->
+  <main id="view-register" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="dyp-auth-split">
+        <aside class="dyp-auth-aside" style="background-image:url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1200&q=80');">
+          <div>
+            <span class="dyp-hero-eyebrow"><i class="bi bi-rocket-takeoff-fill"></i>Comunidad Deportiva</span>
+            <h2 class="text-white fs-1">Empieza tu entrenamiento con nosotros.</h2>
+            <p class="text-light">Crea tu perfil y accede a soporte técnico y promociones personalizadas.</p>
+          </div>
+        </aside>
+
+        <div class="p-4 p-md-5 d-flex flex-column justify-content-center">
+          <div class="text-center mb-4">
+            <div class="dyp-logo fs-3 justify-content-center mb-2">
+              <span class="dyp-logo-mark"><i class="bi bi-lightning-charge-fill"></i></span>DYP<span class="text-danger">Store</span>
+            </div>
+            <h2 class="text-white fs-3">Crear Cuenta</h2>
+            <p class="text-secondary small">Completa los campos para unirte a DYPStore</p>
+          </div>
+
+          <form onsubmit="event.preventDefault(); showToast('¡Cuenta creada exitosamente! Bienvenido.'); showScreen('home');">
+            <div class="mb-3">
+              <label class="form-label text-secondary small">Nombre Completo</label>
+              <input type="text" class="form-control dyp-input" placeholder="Ej. Carlos Mendoza" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary small">Correo Electrónico</label>
+              <input type="email" class="form-control dyp-input" placeholder="tu@correo.com" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary small">Contraseña (Mínimo 8 caracteres, símbolos y números)</label>
+              <input type="password" class="form-control dyp-input" placeholder="••••••••" required />
+            </div>
+            <div class="mb-4">
+              <label class="form-label text-secondary small">Confirmar Contraseña</label>
+              <input type="password" class="form-control dyp-input" placeholder="••••••••" required />
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100 btn-lg fw-bold mb-3">
+              <i class="bi bi-person-check-fill me-2"></i>Registrarme
+            </button>
+          </form>
+
+          <p class="text-center text-secondary small mb-0">
+            ¿Ya tienes cuenta? <a href="javascript:void(0)" class="text-danger fw-bold" onclick="showScreen('login')">Inicia sesión</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 6: CARRITO DE COMPRAS
+       ==================================================================== -->
+  <main id="view-cart" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="text-danger small fw-bold text-uppercase">Tu Compra</span>
+          <h1 class="text-white mb-0">Carrito de Compras</h1>
+        </div>
+        <button class="btn btn-outline-light btn-sm" onclick="showScreen('catalog')">
+          <i class="bi bi-arrow-left me-1"></i>Seguir Comprando
+        </button>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-12 col-lg-8" id="cart-items-container"></div>
+        <div class="col-12 col-lg-4">
+          <div class="dyp-summary-box">
+            <h4 class="text-white mb-3">Resumen del Pedido</h4>
+            <div class="dyp-summary-row">
+              <span id="cart-items-count">3 items</span>
+              <span id="cart-subtotal" class="text-white fw-bold">$201.97</span>
+            </div>
+            <div class="dyp-summary-row">
+              <span>Envío Nacional</span>
+              <span class="text-success fw-bold">Gratis</span>
+            </div>
+            <div class="dyp-summary-row total">
+              <span>Total Liquidado</span>
+              <span id="cart-total" class="dyp-price fs-3">$201.97</span>
+            </div>
+            
+            <!-- Botón Pasarela Wompi -->
+            <button class="btn btn-danger w-100 btn-lg mt-3 fw-bold d-flex align-items-center justify-content-center py-3" onclick="openWompiModal()">
+              <i class="bi bi-shield-check me-2 fs-5"></i>Pagar con Wompi (Demo)
+            </button>
+
+            <!-- Medios de Pago Habilitados -->
+            <div class="mt-3 p-2 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25 text-center">
+              <div class="text-secondary small fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase;">Medios de Pago Habilitados</div>
+              <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                <span class="badge" style="background:#200020; color:#da0081; border:1px solid #da0081; font-weight:700;"><i class="bi bi-phone me-1"></i>Nequi</span>
+                <span class="badge" style="background:#000; color:#fdc300; border:1px solid #fdc300; font-weight:700;"><i class="bi bi-bank me-1"></i>Bancolombia</span>
+                <span class="badge" style="background:#400000; color:#ff4d4d; border:1px solid #ff4d4d; font-weight:700;"><i class="bi bi-wallet2 me-1"></i>Daviplata</span>
+                <span class="badge bg-secondary text-white"><i class="bi bi-credit-card me-1"></i>Tarjetas</span>
+              </div>
+            </div>
+
+            <div class="text-center mt-2">
+              <a href="javascript:void(0)" onclick="checkout()" class="text-secondary text-decoration-none small opacity-75" style="font-size:0.75rem;">
+                <i class="bi bi-lightning-charge me-1"></i>Omitir pasarela (Checkout rápido directo)
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 7: HISTORIAL DE PEDIDOS
+       ==================================================================== -->
+  <main id="view-orders" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="text-danger small fw-bold text-uppercase">Trazabilidad</span>
+          <h1 class="text-white mb-0">Mis Pedidos</h1>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="showScreen('catalog')">
+          <i class="bi bi-bag-plus me-1"></i>Hacer Nuevo Pedido
+        </button>
+      </div>
+      <div id="orders-container"></div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 8: DASHBOARD ADMINISTRATIVO
+       ==================================================================== -->
+  <main id="view-admin-dashboard" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+          <span class="badge bg-danger mb-2 text-uppercase">Área Restringida</span>
+          <h1 class="text-white mb-0">Dashboard de Administración</h1>
+        </div>
+        <div class="text-secondary small">
+          <i class="bi bi-person-badge me-1"></i>Administrador Activo (admin@dypstore.com)
+        </div>
+      </div>
+
+      <!-- KPIs y Métricas en Tiempo Real -->
+      <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+          <div class="dyp-stat-card">
+            <div class="stat-icon red"><i class="bi bi-box-seam"></i></div>
+            <div class="stat-value text-white" id="admin-stat-products">17</div>
+            <div class="stat-label">Total Productos</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="dyp-stat-card">
+            <div class="stat-icon amber"><i class="bi bi-receipt"></i></div>
+            <div class="stat-value text-white" id="admin-stat-orders">2</div>
+            <div class="stat-label">Pedidos Históricos</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="dyp-stat-card">
+            <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+            <div class="stat-value text-white" id="admin-stat-users">4</div>
+            <div class="stat-label">Usuarios en Base de Datos</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="dyp-stat-card">
+            <div class="stat-icon green"><i class="bi bi-currency-dollar"></i></div>
+            <div class="stat-value text-white" id="admin-stat-revenue">$202</div>
+            <div class="stat-label">Ingresos Concretados</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accesos Directos a Módulos Admin -->
+      <h3 class="text-white mb-3 fs-4">Módulos de Gestión</h3>
+      <div class="row g-4">
+        <div class="col-12 col-md-4">
+          <div class="p-4 rounded-4 bg-dark border border-secondary border-opacity-25 h-100">
+            <i class="bi bi-box-seam-fill text-danger fs-1 mb-3 d-block"></i>
+            <h4 class="text-white fs-5">Inventario de Productos</h4>
+            <p class="text-secondary small">Crear, actualizar precios, stock y eliminar productos del catálogo.</p>
+            <button class="btn btn-danger btn-sm" onclick="showScreen('admin-products')">
+              Gestionar Catálogo <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="p-4 rounded-4 bg-dark border border-secondary border-opacity-25 h-100">
+            <i class="bi bi-receipt text-warning fs-1 mb-3 d-block"></i>
+            <h4 class="text-white fs-5">Control de Pedidos</h4>
+            <p class="text-secondary small">Revisar estados de entrega y autorizar transiciones de pedidos.</p>
+            <button class="btn btn-warning btn-sm" onclick="showScreen('orders')">
+              Ver Pedidos Globales <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="p-4 rounded-4 bg-dark border border-secondary border-opacity-25 h-100">
+            <i class="bi bi-robot text-primary fs-1 mb-3 d-block"></i>
+            <h4 class="text-white fs-5">Auditoría IA & ChatLogs</h4>
+            <p class="text-secondary small">Supervisar las conversaciones de los clientes con el asistente virtual.</p>
+            <button class="btn btn-primary btn-sm" onclick="toggleChatbot()">
+              Abrir Asistente IA <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       PANTALLA 9: GESTIÓN DE PRODUCTOS (ADMIN CRUD)
+       ==================================================================== -->
+  <main id="view-admin-products" class="dyp-mockup-view d-none py-5">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+        <div>
+          <span class="badge bg-danger mb-1 text-uppercase">Catálogo</span>
+          <h1 class="text-white mb-0">Gestión de Inventario</h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-light btn-sm" onclick="showScreen('admin-dashboard')">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="openCreateProductModal()">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <input type="search" class="form-control dyp-input" placeholder="Filtrar por nombre, marca o categoría..." oninput="renderAdminProductsTable(this.value)" style="max-width:380px;" />
+        <span class="text-secondary small" id="admin-products-total-badge">17 productos</span>
+      </div>
+
+      <div class="table-responsive rounded-4 border border-secondary border-opacity-25">
+        <table class="table table-dark table-hover mb-0 align-middle">
+          <thead class="table-secondary text-uppercase small text-dark">
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-products-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====================================================================
+       FOOTER GENERAL
+       ==================================================================== -->
+  <footer class="dyp-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-12 col-md-6">
+          <div class="dyp-logo fs-4 mb-2">
+            <span class="dyp-logo-mark"><i class="bi bi-lightning-charge-fill"></i></span>DYP<span class="text-danger">Store</span>
+          </div>
+          <p class="text-secondary small" style="max-width:400px;">
+            Plataforma de comercio electrónico de alto rendimiento especializada en Boxeo, Calzado Deportivo y Suplementación.
+          </p>
+        </div>
+        <div class="col-6 col-md-3">
+          <h6 class="text-white">Navegación</h6>
+          <ul class="list-unstyled text-secondary small">
+            <li><a href="javascript:void(0)" onclick="showScreen('home')" class="text-secondary text-decoration-none">Inicio</a></li>
+            <li><a href="javascript:void(0)" onclick="showScreen('catalog')" class="text-secondary text-decoration-none">Catálogo</a></li>
+            <li><a href="javascript:void(0)" onclick="showScreen('orders')" class="text-secondary text-decoration-none">Mis Pedidos</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-md-3">
+          <h6 class="text-white">Seguridad & TI</h6>
+          <ul class="list-unstyled text-secondary small">
+            <li>PostgreSQL (Supabase + Neon)</li>
+            <li>Autenticación Face ID 128D</li>
+            <li>ASP.NET Core 8 MVC</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-top border-secondary border-opacity-10 mt-4 pt-3 text-center text-secondary small">
+        &copy; 2026 DYPStore. Mockup Funcional para Entrega Académica. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================================================================
+       WIDGET FLOTANTE: CHATBOT ASISTENTE IA
+       ==================================================================== -->
+  <button type="button" class="dyp-chatbot-fab" title="Asistente Virtual IA" onclick="toggleChatbot()">
+    <i class="bi bi-chat-dots-fill"></i>
+  </button>
+
+  <div id="dypChatPanel" class="dyp-chatbot-panel d-none">
+    <div class="dyp-chatbot-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="dyp-logo-mark" style="width:28px; height:28px; font-size:0.9rem;"><i class="bi bi-lightning-charge-fill"></i></div>
+        <div>
+          <strong class="text-white d-block small">Asistente DYPStore</strong>
+          <small class="text-success" style="font-size:0.7rem;">● En línea (IA Activa)</small>
+        </div>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="toggleChatbot()">✕</button>
+    </div>
+
+    <div id="dypChatMessages" class="dyp-chatbot-messages">
+      <div class="dyp-chat-bubble bot">
+        ¡Hola! Soy el asistente virtual inteligente de <strong>DYPStore</strong>. Puedo recomendarte productos de boxeo, calzado o suplementos, o verificar existencias en inventario. ¿Cómo te ayudo?
+      </div>
+    </div>
+
+    <div class="p-2 border-top border-secondary border-opacity-25 d-flex gap-2">
+      <input type="text" id="dypChatInput" class="form-control dyp-input py-1 px-3 small" placeholder="Escribe tu consulta..." />
+      <button class="btn btn-danger btn-sm px-3" onclick="sendChatMessage()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: FORMULARIO CREAR / EDITAR PRODUCTO (ADMIN)
+       ==================================================================== -->
+  <div class="modal fade" id="productFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content bg-dark text-white border-secondary">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="modalProductTitle">Producto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="modalProductForm" onsubmit="saveProductFromModal(event)">
+          <div class="modal-body">
+            <input type="hidden" id="modalProductId" />
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Nombre del Producto</label>
+                <input type="text" id="modalProductName" class="form-control dyp-input" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-secondary">Marca</label>
+                <input type="text" id="modalProductBrand" class="form-control dyp-input" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-secondary">Categoría</label>
+                <select id="modalProductCategory" class="form-select dyp-input">
+                  <option value="boxing">Boxeo (boxing)</option>
+                  <option value="shoes">Tenis (shoes)</option>
+                  <option value="supplements">Suplementos (supplements)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-secondary">Precio ($ USD)</label>
+                <input type="number" step="0.01" min="0" id="modalProductPrice" class="form-control dyp-input" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small text-secondary">Stock (Inventario)</label>
+                <input type="number" min="0" id="modalProductStock" class="form-control dyp-input" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-secondary">URL de Imagen</label>
+                <input type="url" id="modalProductImage" class="form-control dyp-input" />
+              </div>
+              <div class="col-12">
+                <label class="form-label small text-secondary">Descripción Detallada</label>
+                <textarea id="modalProductDesc" class="form-control dyp-input" rows="3" required></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-danger">Guardar en Catálogo</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: SIMULADOR DE FACE ID BIOMETRIC LOGIN
+       ==================================================================== -->
+  <div class="modal fade" id="faceIdSimModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-black text-white border-danger">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title text-danger"><i class="bi bi-shield-lock-fill me-2"></i>DYPStore Face ID</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center py-4">
+          <div class="rounded-circle border border-2 border-danger p-4 d-inline-flex mb-3 position-relative" style="box-shadow: 0 0 25px rgba(255,45,77,0.4);">
+            <i class="bi bi-person-bounding-box fs-1 text-danger"></i>
+          </div>
+          <h5 class="text-white mb-2">Reconocimiento Facial Activo</h5>
+          <p id="faceSimStatus" class="text-secondary small mb-3">Iniciando cámara y modelos convolucionales...</p>
+          <div class="progress bg-dark" style="height: 6px;">
+            <div id="faceSimBar" class="progress-bar bg-danger progress-bar-striped progress-bar-animated" style="width: 10%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: PASARELA DE PAGO WOMPI DEMO (MOCKUP INTERACTIVO)
+       ==================================================================== -->
+  <div class="modal fade" id="wompiMockupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-white border border-secondary border-opacity-50 shadow-lg" style="border-radius:20px; overflow:hidden;">
+        
+        <!-- Header Wompi -->
+        <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3" style="background:linear-gradient(135deg, #16161f 0%, #0d0d14 100%);">
+          <div class="d-flex align-items-center gap-3">
+            <div style="background:#000; padding:6px 14px; border-radius:10px; border:1px solid #fdc300;">
+              <span style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.4rem; color:#fff;">wompi<span style="color:#fdc300;">.</span></span>
+            </div>
+            <div>
+              <h6 class="modal-title fw-bold mb-0 text-white">Pasarela de Pagos Segura</h6>
+              <small class="text-warning" style="font-size:0.75rem;"><i class="bi bi-cone-striped me-1"></i>Ambiente Sandbox Demo · Vigilado SuperFinanciera</small>
+            </div>
+          </div>
+          <div class="text-end">
+            <span class="text-secondary small d-block">Monto a Pagar</span>
+            <span class="fw-bold fs-5 text-white" id="wompiModalTotal">$201.97 <small class="text-danger">COP</small></span>
+          </div>
+          <button type="button" class="btn-close btn-close-white ms-3" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Cuerpo Modal -->
+        <div class="modal-body p-4">
+          <ul class="nav nav-pills nav-fill mb-4 p-1 rounded-3 bg-black border border-secondary border-opacity-25" id="wompiMockupTabs" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="pill" data-bs-target="#wmock-nequi" type="button">
+                <span class="badge" style="background:#da0081;">N</span> Nequi
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="pill" data-bs-target="#wmock-bancolombia" type="button">
+                <span class="badge" style="background:#fdc300; color:#000;">B</span> Bancolombia
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="pill" data-bs-target="#wmock-daviplata" type="button">
+                <span class="badge" style="background:#ed1c24;">D</span> Daviplata
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link text-white fw-semibold py-2 d-flex align-items-center justify-content-center gap-2" data-bs-toggle="pill" data-bs-target="#wmock-card" type="button">
+                <i class="bi bi-credit-card-2-front text-info"></i> Tarjetas
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="wompiMockupTabsContent">
+
+            <!-- NEQUI -->
+            <div class="tab-pane fade show active" id="wmock-nequi">
+              <div class="p-3 rounded-3 mb-3" style="background:rgba(218,0,129,0.08); border:1px solid rgba(218,0,129,0.25);">
+                <h6 class="fw-bold mb-1 text-white"><i class="bi bi-phone-vibrate text-danger me-2"></i>Paga con Nequi en 1 Clic</h6>
+                <p class="text-secondary small mb-0">Ingresa tu número celular y autoriza el débito desde la notificación en tu app.</p>
+              </div>
+              <div class="mb-3">
+                <label class="form-label text-secondary small fw-bold">Número de Celular Nequi</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-black border-secondary text-secondary">+57</span>
+                  <input type="tel" class="form-control dyp-input" value="312 456 7890" maxlength="10" />
+                </div>
+              </div>
+              <div id="mockNequiPushSim" class="p-3 rounded-3 bg-black border border-secondary border-opacity-25 mb-3 d-none text-center">
+                <div class="spinner-grow text-danger mb-2" role="status"></div>
+                <div class="text-white fw-bold">Notificación enviada a tu Nequi</div>
+                <small class="text-secondary d-block mb-2">Presiona abajo para simular la confirmación en tu celular:</small>
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="confirmarPagoMockup('Nequi Push')">Aprobar Débito en App Nequi</button>
+              </div>
+              <button type="button" id="btnMockNequiPay" class="btn btn-lg w-100 fw-bold" style="background:#da0081; color:#fff;" onclick="iniciarNequiPushMockup()">
+                <i class="bi bi-send-check me-2"></i>Generar Cobro Nequi
+              </button>
+            </div>
+
+            <!-- BANCOLOMBIA -->
+            <div class="tab-pane fade" id="wmock-bancolombia">
+              <div class="p-3 rounded-3 mb-3" style="background:rgba(253,195,0,0.08); border:1px solid rgba(253,195,0,0.25);">
+                <h6 class="fw-bold mb-1 text-white"><i class="bi bi-bank text-warning me-2"></i>Botón Bancolombia / Transferencia</h6>
+                <p class="text-secondary small mb-0">Débito automático desde tu cuenta de Ahorros o Corriente sin costo.</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Tipo de Cuenta</label>
+                  <select class="form-select dyp-input">
+                    <option>Cuenta de Ahorros Bancolombia</option>
+                    <option>Cuenta Corriente Bancolombia</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Número de Cuenta</label>
+                  <input type="text" class="form-control dyp-input" value="541-987654-32" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Documento</label>
+                  <input type="text" class="form-control dyp-input" value="1020304050" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Clave Dinámica (6 dígitos)</label>
+                  <input type="password" class="form-control dyp-input text-center font-monospace" value="789012" maxlength="6" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-lg w-100 fw-bold mt-4" style="background:#fdc300; color:#000;" onclick="confirmarPagoMockup('Bancolombia')">
+                <i class="bi bi-check2-circle me-2"></i>Pagar con Transferencia Bancolombia
+              </button>
+            </div>
+
+            <!-- DAVIPLATA -->
+            <div class="tab-pane fade" id="wmock-daviplata">
+              <div class="p-3 rounded-3 mb-3" style="background:rgba(237,28,36,0.08); border:1px solid rgba(237,28,36,0.25);">
+                <h6 class="fw-bold mb-1 text-white"><i class="bi bi-wallet2 text-danger me-2"></i>Daviplata Digital</h6>
+                <p class="text-secondary small mb-0">Ingresa tu número celular registrado y confirma con el código SMS.</p>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Celular Daviplata</label>
+                  <input type="tel" class="form-control dyp-input" value="3159876543" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Cédula</label>
+                  <input type="text" class="form-control dyp-input" value="1098765432" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label text-secondary small fw-bold">Código OTP de Seguridad (SMS)</label>
+                  <input type="password" class="form-control dyp-input text-center font-monospace" value="456789" maxlength="6" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-lg w-100 fw-bold mt-4" style="background:#ed1c24; color:#fff;" onclick="confirmarPagoMockup('Daviplata')">
+                <i class="bi bi-shield-check me-2"></i>Confirmar Pago Daviplata
+              </button>
+            </div>
+
+            <!-- TARJETAS -->
+            <div class="tab-pane fade" id="wmock-card">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label text-secondary small fw-bold">Número de Tarjeta</label>
+                  <input type="text" class="form-control dyp-input font-monospace" value="4575 8920 1142 8890" maxlength="19" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-bold">Titular</label>
+                  <input type="text" class="form-control dyp-input" value="CARLOS A MENDOZA" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label text-secondary small fw-bold">Expiración</label>
+                  <input type="text" class="form-control dyp-input text-center font-monospace" value="08/29" maxlength="5" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label text-secondary small fw-bold">CVV</label>
+                  <input type="password" class="form-control dyp-input text-center font-monospace" value="789" maxlength="4" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-danger btn-lg w-100 fw-bold mt-4" onclick="confirmarPagoMockup('Tarjeta de Crédito')">
+                <i class="bi bi-lock-fill me-2"></i>Pagar con Tarjeta
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Estado de Procesamiento / Aprobación -->
+          <div id="mockWompiProcessing" class="text-center py-4 d-none">
+            <div class="spinner-border text-danger mb-3" style="width:3rem; height:3rem;"></div>
+            <h5 class="fw-bold text-white mb-1">Procesando pago con Wompi...</h5>
+            <p class="text-secondary small mb-0">Verificando fondos y emitiendo comprobante fiscal seguro.</p>
+          </div>
+
+          <div id="mockWompiSuccess" class="text-center py-4 d-none">
+            <div class="rounded-circle bg-success bg-opacity-25 text-success p-3 d-inline-flex mb-3">
+              <i class="bi bi-check-circle-fill" style="font-size:3rem;"></i>
+            </div>
+            <h4 class="fw-bold text-white mb-1">¡Pago Aprobado por Wompi!</h4>
+            <p class="text-secondary small mb-2">Referencia de Transacción: <span class="badge bg-secondary font-monospace" id="mockWompiRef">WMP-819203</span></p>
+            <div class="alert alert-success py-2 small mx-auto" style="max-width:440px;">
+              Tu pedido ha sido creado y el inventario descontado. Redirigiendo a Mis Pedidos...
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer border-top border-secondary border-opacity-25 px-4 py-2 d-flex justify-content-between align-items-center" style="background:#09090d;">
+          <small class="text-secondary"><i class="bi bi-shield-lock-fill text-success me-1"></i>Cifrado SSL de 256 bits · Wompi Bancolombia</small>
+          <small class="text-secondary font-monospace">DYPStore E-Commerce S.A.S</small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Lógica Interactiva del Mockup -->
+  <script src="js/mockup.js"></script>
+
+</body>
+</html>
+

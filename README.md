@@ -9,8 +9,30 @@ DYPStore es una aplicación web de e-commerce completa construida con ASP.NET Co
 - **Base de datos:** PostgreSQL (con failover a Supabase/Neon)
 - **Frontend:** Razor Views, Bootstrap, JavaScript
 - **Autenticación:** ASP.NET Identity con Face ID personalizado
-- **IA:** Chatbot integrado con OpenAI API
+- **IA:** Chatbot integrado con OpenAI API y Google Gemini
+- **Pasarela de Pago:** Wompi Bancolombia (Demo Sandbox: Nequi, Botón Bancolombia, Daviplata, Tarjetas)
 - **PWA:** Service Worker, Manifest, Iconos
+
+---
+
+## 🎓 Entregables Académicos y Documentación Complementaria
+
+Como parte de la complementación académica y técnica del proyecto DYPStore, se han elaborado los siguientes documentos formales e interactivos disponibles en el repositorio:
+
+0. [**📖 Documentación Maestra Integral del Sistema**](docs/DOCUMENTACION_MAESTRA_DYPSTORE.md):
+   - **Guía enciclopédica del proyecto:** Arquitectura completa, mapa exhaustivo de directorios carpeta por carpeta, explicación detallada de cada archivo y subsistema (Catálogo, Carrito Wompi, Pedidos, Face ID, Chatbot, DatabaseSteward, Criptografía), ciclo de vida de peticiones HTTP, diccionario de las 14 tablas en PostgreSQL y manual de despliegue.
+1. [**Especificación de Requisitos de Software (SRS)**](docs/entregables/01_especificacion_requisitos.md):
+   - Documento comprensivo con 25 Requisitos Funcionales (RF-001 al RF-025), 12 Requisitos No Funcionales (RNF-001 al RNF-012), actores del sistema, priorización MoSCoW, precondiciones, criterios de aceptación y matriz de trazabilidad integral.
+2. [**Propuesta Técnica de Servicios TI y Arquitectura de Software**](docs/entregables/02_propuesta_tecnica_servicios_ti.md):
+   - Análisis formal de arquitectura cliente-servidor y MVC, capas de software, servicios tecnológicos (`DatabaseSteward`, `ChatbotService`, `EmailSender`), resiliencia de infraestructura con failover (Supabase + Neon), contenedorización con Docker, seguridad OWASP y justificación de tecnologías.
+3. [**Modelo y Especificación de Base de Datos**](docs/entregables/03_modelo_base_datos.md):
+   - Diagrama MER, diccionario de datos exhaustivo de las 14 tablas (ASP.NET Identity + Dominio DYPStore), tipos de datos PostgreSQL, índices B-Tree, restricciones CHECK, análisis formal de normalización (1FN, 2FN, 3FN) y dependencias funcionales.
+4. [**Script PostgreSQL Oficial de Entrega**](Database/DYPStore_PostgreSQL_Entrega.sql):
+   - Script DDL nativo para PostgreSQL, 100% alineado con las migraciones reales de EF Core y el snapshot actual. Contempla todas las tablas, relaciones, índices, restricciones CHECK y datos semilla de 17 productos sin instrucciones destructivas (no invasivo).
+5. [**Mockup Funcional Interactivo (HTML / CSS / JS)**](docs/entregables/mockup/index.html):
+   - Prototipo independiente en Bootstrap 5 que representa visual y funcionalmente las 9 pantallas clave de DYPStore (Inicio, Catálogo, Detalle, Login, Registro, Carrito, Pedidos, Dashboard Admin y Gestión de Productos) con simulador biométrico de Face ID y Asistente IA interactivo.
+6. [**Informe de Correspondencia: Mockup vs. Frontend Razor**](docs/entregables/04_correspondencia_mockup_frontend.md):
+   - Matriz detallada que relaciona cada pantalla del mockup con su vista Razor, controlador, ViewModel y funcionalidad real, documentando rigurosamente las equivalencias y diferencias tecnológicas.
 
 ---
 
@@ -157,11 +179,16 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) => {
     options.UseNpgsql(steward.GetConnectionString());
 });
 
-// 2. Identity con configuración relajada
+// 2. Identity con configuración estándar OWASP (Program.cs)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    // ... más configuraciones
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.User.RequireUniqueEmail = true;
 });
 
 // 3. Servicios personalizados
@@ -245,7 +272,7 @@ public class Product
 **Ubicaciones:** 
 - `DYPStore/Models/Order.cs`
 - `DYPStore/Models/OrderItem.cs`
-- Estados de orden: `Pending`, `Processing`, `Shipped`, `Delivered`, `Cancelled`
+- Estados de orden: `pending`, `processing`, `completed`, `cancelled` (según enum `OrderStatus` en `Models/Order.cs`)
 - OrderItem vincula productos con cantidades específicas
 
 #### ChatLog (`Models/ChatLog.cs`)
@@ -314,9 +341,10 @@ public class FaceEnrollment
 
 #### ChatbotController (`Controllers/ChatbotController.cs`)
 **Ubicación:** `DYPStore/Controllers/ChatbotController.cs`
-- **POST /api/chatbot/ask**: Procesa preguntas del usuario
-- Integra con OpenAI API
-- Registra conversaciones en ChatLog
+- **POST /api/chatbot/message**: Procesa preguntas de usuarios autenticados (User o Admin)
+- **POST /api/chatbot/public**: Procesa preguntas de visitantes o usuarios anónimos
+- Integra con OpenAI API (gpt-4o-mini) y Google Gemini con fallback a motor de reglas
+- Registra conversaciones en ChatLog (auditoría)
 
 ### Área de Administración
 
@@ -526,9 +554,9 @@ public class ChatbotService
 5. **AddChatLog**: `20260514000000_AddChatLog.cs` - Tabla para historial de chat
 6. **AddFaceEnrollment**: `20260514000001_AddFaceEnrollment.cs` - Tabla para biometría facial
 
-### Script SQL
-
-**Ubicación:** `DYPStore/Database/DYPStore_Script.sql`
+### Scripts SQL
+- **Script PostgreSQL Oficial (Entrega):** `Database/DYPStore_PostgreSQL_Entrega.sql` (100% compatible con EF Core, PostgreSQL y todas las entidades del sistema)
+- **Script Original Legacy (SQL Server):** `Database/DYPStore_Script.sql` (Versión histórica para SQL Server)
 
 ### Comando de Migración
 
